@@ -1,3 +1,4 @@
+//@flow
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 
@@ -12,10 +13,8 @@ const processors = {
 /**
  * If there is data process it, otherwise return
  * the characters "--" - our convention for no-data
- * @param {*} data - Any object, string, array, we are checking for content
- * @param String displayType - date, boolean, keyword, long
  */
-export default ({ data, type, unit }) =>
+export default ({ data, type, unit }: { data: any, type: string, unit: string }) =>
   (type !== 'boolean' && !data) || data.length === 0 || isEmpty(data)
     ? '--'
     : `${processors[type || 'keyword'](data)}${unit ? ` ${unit}` : ''}`;

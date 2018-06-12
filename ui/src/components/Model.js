@@ -1,3 +1,4 @@
+//@flow
 import React from 'react';
 import Component from 'react-component-component';
 import { get } from 'lodash';
@@ -33,7 +34,7 @@ const HorizontalTable = ({
         fieldNames.includes(field)
           ? {
               ...acc,
-              [displayName]: apiDataProcessor({ data: get(rawData, field), type, unit }),
+              [displayName]: apiDataProcessor({ data: get(rawData, field), type }),
             }
           : acc,
       {},
