@@ -101,6 +101,8 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
         touched: {},
         errors: {},
       },
+      imageFiles: [],
+      savedImageFiles: [],
       notifications: [],
     }}
     didMount={async ({ state, setState }) => {
@@ -149,6 +151,10 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
                 ...state.ModelSingle,
                 activeTab: tabName,
               },
+              form: {
+                ...state.form,
+                isReadyToSave: tabName === 'images' ? true : state.form.isReadyToSave,
+              },
             });
           },
           syncFormState: async formState => {
@@ -166,8 +172,12 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
               },
             });
           },
-          saveForm: async values => {
+          saveForm: async () => {
             // Set loading true (lock UI)
+            const {
+              form: { values },
+              savedImageFiles,
+            } = state;
             await setState(() => ({
               ...state,
               data: {
@@ -184,6 +194,10 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
               const modelDataResponse = await saveModel(
                 {
                   ...values,
+                  files: Object.entries(savedImageFiles).map(([id, info]) => ({
+                    file_name: id,
+                    file_type: info.type,
+                  })),
                   status: computeModelStatus(values.status, 'save'),
                 },
                 isUpdate,
@@ -325,6 +339,32 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
               ...state,
               notifications: [],
             }),
+          setImageFiles: imageFiles => setState({ ...state, imageFiles }),
+          uploadImages: async () => {
+            state.imageFiles.forEach(async file => {
+              let formData = new FormData();
+              formData.append('filename', file.name);
+              formData.append('image', file);
+              const response = await fetchData({
+                url: `${baseUrl}/images`,
+                data: formData,
+                method: 'post',
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              });
+              console.log(response);
+              if (response.status >= 200 && response.status < 300) {
+                setState({
+                  ...state,
+                  savedImageFiles: {
+                    ...state.savedImageFiles,
+                    [response.data.id]: { filename: response.data.filename, type: file.type },
+                  },
+                });
+              }
+            });
+          },
         }}
         {...props}
       >
