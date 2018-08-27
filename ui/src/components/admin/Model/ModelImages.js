@@ -7,13 +7,14 @@ import base from 'theme';
 import { Row, Col } from 'theme/system';
 import { FormHeader } from 'theme/adminModelFormStyles';
 import DragNDropIcon from 'icons/DragNDrop';
+import config from '../config';
 
 const {
   keyedPalette: { frenchGrey, lightPorcelain, mineShaft, porcelain },
   fonts: { libreFranklin, openSans },
 } = base;
 
-const ImagePreview = ({ name, preview }) => (
+const ImagePreview = ({ file_id, file_name, preview }) => (
   <Col
     css={`
       font: ${openSans};
@@ -25,24 +26,31 @@ const ImagePreview = ({ name, preview }) => (
       margin-right: 15px;
     `}
   >
-    <img src={preview} alt={`File: ${name}`} height="155" width="250" />
+    <img
+      src={preview ? preview : `${config.urls.cmsBase}/images/${file_id}`}
+      alt={`File: ${file_name}`}
+      height="155"
+      width="250"
+    />`
     <b
       css={`
         align-self: start;
       `}
     >
-      {name}
+      {file_name}
     </b>
   </Col>
 );
 
 const ImageGallery = ({ acceptedFiles }) => (
   <>
-    {acceptedFiles.map(({ name, preview }) => <ImagePreview key={name} {...{ name, preview }} />)}
+    {acceptedFiles.map(({ file_id, file_name, preview }) => (
+      <ImagePreview key={file_id} {...{ file_id, file_name, preview }} />
+    ))}
   </>
 );
 
-const ImageDropper = ({ imageFiles, enqueueImage }) => (
+const ImageDropper = ({ enqueueImage }) => (
   <Dropzone
     css={`
       border: 2px dashed ${frenchGrey};
@@ -105,7 +113,7 @@ export default () => (
           },
         },
         enqueueImage,
-        imageFiles = imageUploadQueue,
+        imageFiles = [...imageUploadQueue, ...files],
       }) => (
         <>
           <Row p={18}>
@@ -114,7 +122,7 @@ export default () => (
             {!!imageFiles.length && ' Drag and drop images to reorder them within the gallery.'}
           </Row>
           <Row p={18}>
-            {!!imageFiles.length && <ImageGallery acceptedFiles={imageUploadQueue} />}
+            {!!imageFiles.length && <ImageGallery acceptedFiles={imageFiles} />}
             {!imageFiles.length && <ImageDropper {...{ imageFiles, enqueueImage }} />}
           </Row>
         </>

@@ -337,7 +337,13 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
               notifications: [],
             }),
           enqueueImage: file =>
-            setState({ ...state, imageUploadQueue: [...state.imageUploadQueue, file] }),
+            setState({
+              ...state,
+              imageUploadQueue: [
+                ...state.imageUploadQueue,
+                file.map(f => ({ ...f, file_name: f.name })),
+              ],
+            }),
           uploadImages: async () => {
             const uploaded = await state.imageUploadQueue.reduce(async (acc, file) => {
               let formData = new FormData();
