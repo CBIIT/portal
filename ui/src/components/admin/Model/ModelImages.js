@@ -14,7 +14,7 @@ const {
   fonts: { libreFranklin, openSans },
 } = base;
 
-const ImagePreview = ({ file_id, file_name, preview }) => (
+const ImagePreview = ({ file_id, name, preview }) => (
   <Col
     css={`
       font: ${openSans};
@@ -28,7 +28,7 @@ const ImagePreview = ({ file_id, file_name, preview }) => (
   >
     <img
       src={preview ? preview : `${config.urls.cmsBase}/images/${file_id}`}
-      alt={`File: ${file_name}`}
+      alt={`File: ${name}`}
       height="155"
       width="250"
     />`
@@ -37,20 +37,20 @@ const ImagePreview = ({ file_id, file_name, preview }) => (
         align-self: start;
       `}
     >
-      {file_name}
+      {name}
     </b>
   </Col>
 );
 
 const ImageGallery = ({ acceptedFiles }) => (
   <>
-    {acceptedFiles.map(({ file_id, file_name, preview }) => (
-      <ImagePreview key={file_id} {...{ file_id, file_name, preview }} />
+    {acceptedFiles.map(({ _id, name, preview }) => (
+      <ImagePreview key={name} {...{ file_id: _id, name, preview }} />
     ))}
   </>
 );
 
-const ImageDropper = ({ enqueueImage }) => (
+const ImageDropper = ({ enqueueImages }) => (
   <Dropzone
     css={`
       border: 2px dashed ${frenchGrey};
@@ -63,8 +63,7 @@ const ImageDropper = ({ enqueueImage }) => (
     onDrop={(acceptedFiles, rejectedFiles) => {
       console.log('todo notify rejectedFiles');
       console.log(rejectedFiles);
-      acceptedFiles.forEach(f => enqueueImage(f));
-      //setImageFiles([...imageFiles, ...acceptedFiles]);
+      enqueueImages(acceptedFiles);
     }}
   >
     <Col
@@ -109,10 +108,10 @@ export default () => (
         state: {
           imageUploadQueue,
           data: {
-            response: { files },
+            response: { files = [] },
           },
         },
-        enqueueImage,
+        enqueueImages,
         imageFiles = [...imageUploadQueue, ...files],
       }) => (
         <>
@@ -123,7 +122,7 @@ export default () => (
           </Row>
           <Row p={18}>
             {!!imageFiles.length && <ImageGallery acceptedFiles={imageFiles} />}
-            {!imageFiles.length && <ImageDropper {...{ imageFiles, enqueueImage }} />}
+            {!imageFiles.length && <ImageDropper {...{ imageFiles, enqueueImages }} />}
           </Row>
         </>
       )}

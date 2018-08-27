@@ -118,8 +118,6 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
 
         try {
           const modelDataResponse = await getModel(baseUrl, modelName);
-
-          console.log(modelDataResponse);
           setState(() => ({
             ...state,
             data: {
@@ -192,7 +190,7 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
                 {
                   ...values,
                   files: Object.entries(uploadedImages).map(([id, info]) => ({
-                    file_id: id,
+                    _id: id,
                     ...info,
                   })),
                   status: computeModelStatus(values.status, 'save'),
@@ -336,16 +334,14 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
               ...state,
               notifications: [],
             }),
-          enqueueImage: file =>
+          enqueueImages: (files = {}) =>
             setState({
               ...state,
-              imageUploadQueue: [
-                ...state.imageUploadQueue,
-                file.map(f => ({ ...f, file_name: f.name })),
-              ],
+              imageUploadQueue: [...state.imageUploadQueue, ...files],
             }),
           uploadImages: async () => {
-            const uploaded = await state.imageUploadQueue.reduce(async (acc, file) => {
+            const uploaded = await state.imageUploadQueue.reduce(async (accPromise, file) => {
+              let acc = await accPromise;
               let formData = new FormData();
               formData.append('filename', file.name);
               formData.append('image', file);
@@ -357,19 +353,21 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
                   'Content-Type': 'multipart/form-data',
                 },
               });
-              console.log(response);
               if (response.status >= 200 && response.status < 300) {
+                window.URL.revokeObjectURL(file.preview);
                 return {
                   ...acc,
-                  [response.data.id]: { file_name: file.name, file_type: file.type },
+                  [response.data.id]: { name: file.name, type: file.type },
                 };
               }
-            }, {});
+              return acc;
+            }, Promise.resolve({}));
             const notUploaded = state.imageUploadQueue.filter(file =>
               Object.values(uploaded)
-                .map(({ file_name }) => file_name)
+                .map(({ name }) => name)
                 .includes(file.name),
             );
+            console.log(notUploaded);
             setState({
               ...state,
               imageUploadQueue: notUploaded,
