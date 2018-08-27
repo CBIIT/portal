@@ -1,5 +1,11 @@
 import mongoose from 'mongoose';
 
+const FilesSchema = new mongoose.Schema({
+  file_name: { type: String },
+  file_id: { type: String },
+  file_type: { type: String },
+});
+
 export const ModelSchema = new mongoose.Schema(
   {
     name: { type: String, es_indexed: true },
@@ -27,6 +33,7 @@ export const ModelSchema = new mongoose.Schema(
     licensing_required: { type: Boolean, es_indexed: true },
     source_model_url: { type: String, es_indexed: true },
     source_sequence_url: { type: String, es_indexed: true },
+    files: { type: [FilesSchema], es_indexed: true },
     status: {
       type: String,
       enum: ['unpublished', 'published', 'unpublished changes', 'other'],
