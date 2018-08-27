@@ -101,7 +101,7 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
         touched: {},
         errors: {},
       },
-      imageFiles: [],
+      imageUploadQueue: [],
       savedImageFiles: {},
       notifications: [],
     }}
@@ -119,6 +119,7 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
         try {
           const modelDataResponse = await getModel(baseUrl, modelName);
 
+          console.log(modelDataResponse);
           setState(() => ({
             ...state,
             data: {
@@ -335,9 +336,10 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
               ...state,
               notifications: [],
             }),
-          setImageFiles: imageFiles => setState({ ...state, imageFiles }),
+          enqueueImage: file =>
+            setState({ ...state, imageUploadQueue: [...state.imageUploadQueue, file] }),
           uploadImages: async () => {
-            return state.imageFiles.reduce(async (acc, file) => {
+            const uploaded = await state.imageUploadQueue.reduce(async (acc, file) => {
               let formData = new FormData();
               formData.append('filename', file.name);
               formData.append('image', file);
@@ -357,6 +359,16 @@ export const ModelSingleProvider = ({ baseUrl, modelName, children, ...props }) 
                 };
               }
             }, {});
+            const notUploaded = state.imageUploadQueue.filter(file =>
+              Object.values(uploaded)
+                .map(({ file_name }) => file_name)
+                .includes(file.name),
+            );
+            setState({
+              ...state,
+              imageUploadQueue: notUploaded,
+            });
+            return uploaded;
           },
         }}
         {...props}

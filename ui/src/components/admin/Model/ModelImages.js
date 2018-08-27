@@ -42,7 +42,7 @@ const ImageGallery = ({ acceptedFiles }) => (
   </>
 );
 
-const ImageDropper = ({ imageFiles, setImageFiles }) => (
+const ImageDropper = ({ imageFiles, enqueueImage }) => (
   <Dropzone
     css={`
       border: 2px dashed ${frenchGrey};
@@ -55,9 +55,8 @@ const ImageDropper = ({ imageFiles, setImageFiles }) => (
     onDrop={(acceptedFiles, rejectedFiles) => {
       console.log('todo notify rejectedFiles');
       console.log(rejectedFiles);
-      console.log('acceptedFiles');
-      console.log(acceptedFiles);
-      setImageFiles([...imageFiles, ...acceptedFiles]);
+      acceptedFiles.forEach(f => enqueueImage(f));
+      //setImageFiles([...imageFiles, ...acceptedFiles]);
     }}
   >
     <Col
@@ -98,15 +97,25 @@ export default () => (
       <h2>Model Images</h2>
     </FormHeader>
     <ModelSingleContext.Consumer>
-      {({ state: { imageFiles }, setImageFiles }) => (
+      {({
+        state: {
+          imageUploadQueue,
+          data: {
+            response: { files },
+          },
+        },
+        enqueueImage,
+        imageFiles = imageUploadQueue,
+      }) => (
         <>
           <Row p={18}>
+            {console.log(files)}
             Upload images in jpeg, tiff, png or svg formats.
             {!!imageFiles.length && ' Drag and drop images to reorder them within the gallery.'}
           </Row>
           <Row p={18}>
-            {!!imageFiles.length && <ImageGallery acceptedFiles={imageFiles} />}
-            {!imageFiles.length && <ImageDropper {...{ imageFiles, setImageFiles }} />}
+            {!!imageFiles.length && <ImageGallery acceptedFiles={imageUploadQueue} />}
+            {!imageFiles.length && <ImageDropper {...{ imageFiles, enqueueImage }} />}
           </Row>
         </>
       )}

@@ -24,7 +24,6 @@ export default props => (
                 break;
               case 'images':
                 const uploadedImages = await uploadImages();
-                console.log('save button');
                 saveForm({ values, uploadedImages });
                 break;
               default:
