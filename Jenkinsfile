@@ -47,7 +47,7 @@ properties([
     ])
 ])
 node ('default-lower||default-builder') {
-    configFileProvider([configFile(fileId: 'hcmi-env-config', variable: 'FILE')]) {
+    configFileProvider([configFile(fileId: '9b23762f-2845-4626-9cf2-4236ce3c9965', variable: 'FILE')]) {
         echo "FILE=$FILE"
         load "$FILE"
     }
