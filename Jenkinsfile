@@ -47,7 +47,7 @@ properties([
     ])
 ])
 node ('default-lower||default-builder') {
-    configFileProvider([configFile(fileId: '9b23762f-2845-4626-9cf2-4236ce3c9965', variable: 'FILE')]) {
+    configFileProvider([configFile(fileId: 'hcmi-dev-config', variable: 'FILE')]) {
         echo "FILE=$FILE"
         load "$FILE"
     }
@@ -82,9 +82,9 @@ pipeline {
     }
     stage('Build Dev') {
       steps {
-        failSafeBuild('9c48c4b2-c718-486a-b704-eefaa953d64c',CMS_PACKAGE_TYPE)
-        failSafeBuild('c9318c7b-ad30-433b-b939-4db2c96b7bbe',API_PACKAGE_TYPE)
-        failSafeBuild('be98f0df-7dc8-4632-b869-15c7d09a0768',UI_PACKAGE_TYPE)
+        failSafeBuild('hcmi-cms-dev-config',CMS_PACKAGE_TYPE)
+        failSafeBuild('hcmi-api-dev-config',API_PACKAGE_TYPE)
+        failSafeBuild('hcmi-ui-dev-config',UI_PACKAGE_TYPE)
       }
     }
     stage('Deploy Dev') {
